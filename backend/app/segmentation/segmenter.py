@@ -144,7 +144,14 @@ def merge_parts_and_grow(dets: list[Detection], disparity: np.ndarray, max_frac:
                 if det.label in PART_LABELS and factor > 3:
                     det.label = "person"
         taken |= det.mask
-    return kept
+    # Second pass: parts that now lie inside a grown figure belong to it.
+    out = []
+    for d in sorted(kept, key=lambda x: -x.score):
+        if d.mask is not None and d.label in PART_LABELS and any(
+                o.mask is not None and (d.mask & o.mask).sum() > 0.5 * d.mask.sum() for o in out):
+            continue
+        out.append(d)
+    return out
 
 
 def clean_mask(mask: np.ndarray, min_frac: float = 0.002) -> np.ndarray | None:

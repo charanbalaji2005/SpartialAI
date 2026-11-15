@@ -73,7 +73,7 @@ _PRIORS: list[tuple[tuple[str, ...], ShapePrior]] = [
     (("building", "house", "tower", "wall"), ShapePrior("building", "box", 1.0)),
     (("television", "tv", "monitor", "screen", "laptop"), ShapePrior("screen", "slab", 0.12)),
     (("painting", "picture", "poster", "frame", "door", "window", "mirror", "sign",
-      "board", "rug", "carpet", "mat", "curtain"), ShapePrior("panel", "slab", 0.05)),
+      "board", "rug", "carpet", "mat", "curtain", "layer"), ShapePrior("panel", "slab", 0.05)),
     (("fence", "pole", "post"), ShapePrior("pole", "slab", 0.15)),
 ]
 DEFAULT_PRIOR = ShapePrior("generic", "round", 0.6)

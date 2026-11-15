@@ -267,3 +267,13 @@ def test_face_detection_grows_into_whole_person():
     assert person.mask[110, 60] and person.mask[25, 40] and not person.mask[60, 10]
     # the hand belongs to the same figure: it no longer exists as a separate fragment
     assert all(not (d.mask & person.mask).any() for d in out[1:])
+
+
+def test_background_layers_split_thin_near_strips():
+    h, w = 160, 160
+    disp = np.tile(np.linspace(0.2, 0.3, w, dtype=np.float32), (h, 1))
+    disp[60:72, :] += np.linspace(0.05, 0.4, w)    # a strip in front, with a soft edge at one end
+    taken = np.zeros((h, w), bool)
+    layers = foreground.background_layers(disp, taken)
+    assert layers and layers[0].mask[66, 120] and not layers[0].mask[20, 120]
+    assert comp.prior_for(layers[0].label).profile == "slab"

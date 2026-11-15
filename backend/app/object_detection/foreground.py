@@ -14,6 +14,47 @@ import numpy as np
 from .detector import Detection
 
 
+def background_layers(disparity: np.ndarray, taken: np.ndarray, max_layers: int = 8,
+                      min_frac: float = 0.004, max_frac: float = 0.4,
+                      min_step: float = 0.07) -> list[Detection]:
+    """Split depth layers out of the background (layered-depth reconstruction).
+
+    Regions of the background bounded by depth edges that sit clearly in front
+    of their surroundings (tape across a poster, a branch in front of a wall)
+    are returned as separate layers. Each becomes its own closed solid and the
+    surface behind it is inpainted, instead of the near and far sides being
+    joined by stretched faces. `taken` marks pixels already owned by objects.
+    """
+    d = np.clip(np.nan_to_num(disparity.astype(np.float32)), 0.0, 1.0)
+    h, w = d.shape
+    # White top-hat: how much nearer each pixel is than the background level around it
+    # (an opening with a large kernel). Thin near structures stand out even where their
+    # depth edges are soft, which an edge-bounded region search would leak through.
+    k = max(9, int(0.15 * max(h, w)) | 1)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
+    tophat = d - cv2.morphologyEx(d, cv2.MORPH_OPEN, kernel)
+    near = (tophat > min_step) & ~taken
+    small = np.ones((3, 3), np.uint8)
+    near = cv2.morphologyEx(near.astype(np.uint8), cv2.MORPH_OPEN, small)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(near, connectivity=8)
+    out: list[Detection] = []
+    for i in range(1, n):
+        area = stats[i, cv2.CC_STAT_AREA] / (h * w)
+        if not (min_frac <= area <= max_frac):
+            continue
+        region = (lab == i) & ~taken
+        step = float(np.median(tophat[region]))
+        x, y, bw, bh = (int(v) for v in stats[i, :4])
+        det = Detection("foreground layer", round(min(0.4, 0.15 + step), 3),
+                        [float(x), float(y), float(x + bw - 1), float(y + bh - 1)], "thing")
+        det.mask = region
+        det.mask_method = "depth-layer split"
+        det.mask_score = round(step, 3)
+        out.append(det)
+    out.sort(key=lambda dt: -int(dt.mask.sum()))
+    return out[:max_layers]
+
+
 def propose(disparity: np.ndarray, max_objects: int = 4, min_frac: float = 0.01,
             max_frac: float = 0.75, min_separation: float = 0.08) -> list[Detection]:
     """Near-layer connected components as object proposals.

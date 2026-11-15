@@ -125,6 +125,13 @@ def run(ctx: Context) -> dict[str, Any]:
     stuff = [d for d in stuff if d.mask is not None]
     if not things:
         things = _foreground_fallback(ctx, work_img, norm, mode)
+    taken = np.zeros(norm.shape, bool)
+    for d in things:
+        taken |= d.mask
+    layers = foreground.background_layers(norm, taken)
+    if layers:
+        ctx.log_line("info", f"Split {len(layers)} near depth layer(s) out of the background")
+        things = things + layers
     for k, det in enumerate(things + stuff):
         Image.fromarray(det.mask.astype(np.uint8) * 255).save(
             p["masks"] / f"{k:02d}_{composer.slug(det.label)}.png")
