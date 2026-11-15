@@ -1,0 +1,20 @@
+# YOLO fine-tuning with Ultralytics. Defaults fit an 8 GB RTX 4050.
+device: 0                 # GPU index, or "cpu"
+model:
+  name: yolo11n.pt        # downloaded by Ultralytics on first use (AGPL-3.0 license)
+data:
+  yaml: training/data/processed/detection/coco_yolo_spatialai/data.yaml
+train:
+  epochs: 30
+  imgsz: 640
+  batch: 4
+  workers: 2
+  patience: 8
+  optimizer: AdamW
+  lr0: 0.001
+  cos_lr: true
+  close_mosaic: 5
+  amp: true
+  fraction: 1.0           # use e.g. 0.1 for a quick experiment on 10% of the data
+  cache: false            # "ram" speeds up small subsets if you have the memory
+  seed: 0

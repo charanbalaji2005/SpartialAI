@@ -1,0 +1,37 @@
+# Depth Anything V2 fine-tuning. Defaults fit an 8 GB RTX 4050.
+seed: 0
+device: auto
+model:
+  name: depth-anything/Depth-Anything-V2-Small-hf   # Apache-2.0. Base/Large are CC-BY-NC-4.0 and need more VRAM.
+  gradient_checkpointing: false                     # true saves memory at ~25% speed cost
+data:
+  manifests:                                        # any mix of prepared depth manifests
+    - training/data/manifests/depth_folder.csv
+  input_size: [378, 504]                            # H, W; multiples of 14 (DINOv2 patch size)
+  workers: 0
+  limit_train: null                                 # e.g. 500 for a quick experiment
+  limit_val: 300
+augment:
+  scale: [0.6, 1.0]                                 # random crop area fraction
+  flip: true
+  color: 1.0                                        # photometric strength (image only)
+loss:
+  trim: 0.2                                         # ignore the largest 20% residuals (label noise)
+  grad_weight: 0.5
+train:
+  epochs: 8
+  batch_size: 2
+  grad_accum: 4                                     # effective batch 8
+  lr_head: 5.0e-5
+  lr_backbone: 5.0e-6
+  freeze_backbone_epochs: 1
+  weight_decay: 0.01
+  amp: fp16
+  clip_grad: 1.0
+  warmup_steps: 200
+  early_stop_patience: 3
+  recovery_every: 500
+eval:
+  max_depth: 10.0                                   # NYU convention; use 20-80 for outdoor data
+log:
+  tensorboard: true

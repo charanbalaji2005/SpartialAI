@@ -1,0 +1,9 @@
+# Training extras. Install AFTER backend/requirements.txt (which brings PyTorch CUDA,
+# transformers, numpy, opencv, trimesh, pillow, scipy):
+#   backend\.venv\Scripts\python -m pip install -r requirements-training.txt
+pyyaml>=6.0
+tqdm>=4.66
+h5py>=3.10          # NYU .mat (v7.3) and Hypersim depth files
+tensorboard>=2.16   # optional live curves: tensorboard --logdir checkpoints/runs
+ultralytics>=8.3    # YOLO detection training (AGPL-3.0)
+objaverse>=0.1.7    # optional: Objaverse subset download

@@ -1,0 +1,31 @@
+# SegFormer-B0 fine-tuning on ADE20K. Defaults fit an 8 GB RTX 4050.
+seed: 0
+device: auto
+model:
+  name: nvidia/segformer-b0-finetuned-ade-512-512   # or nvidia/mit-b0 to start from ImageNet weights
+data:
+  manifest: training/data/manifests/segmentation_ade20k.csv
+  class_names: training/data/manifests/segmentation_ade20k_classes.json
+  crop: 512
+  workers: 2
+  limit_train: null
+  limit_val: 500
+augment:
+  scale: [0.5, 2.0]
+  flip: true
+  color: 1.0
+loss:
+  ohem: 0.0              # e.g. 0.25 = train on the hardest 25% of pixels
+train:
+  epochs: 15
+  batch_size: 2
+  grad_accum: 4
+  lr: 6.0e-5
+  weight_decay: 0.01
+  amp: fp16
+  clip_grad: 1.0
+  warmup_steps: 500
+  early_stop_patience: 4
+  recovery_every: 1000
+log:
+  tensorboard: true

@@ -1,0 +1,18 @@
+# Install PyTorch FIRST with CUDA (see README / setup_environment.ps1), e.g.:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+pydantic>=2.7
+transformers>=4.45
+accelerate>=0.33
+huggingface_hub>=0.25
+safetensors>=0.4
+pillow>=10.4
+numpy>=1.26
+opencv-contrib-python>=4.10
+scipy>=1.13
+trimesh>=4.4
+# tests
+pytest>=8.0
+httpx>=0.27

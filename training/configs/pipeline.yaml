@@ -1,0 +1,11 @@
+# What train_all.py runs, in order. Steps whose data is missing are skipped with a message.
+steps:
+  - name: depth
+    config: depth.yaml
+    promote: true
+  - name: segmentation
+    config: segmentation.yaml
+    promote: true
+  - name: detection
+    config: detection.yaml
+    promote: true
